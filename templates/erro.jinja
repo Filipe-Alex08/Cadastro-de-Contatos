@@ -1,0 +1,10 @@
+{% extends "base.jinja" %}
+
+{% block title %}Erro {{codigo}}{% endblock %}
+
+{% block main %}
+<div class="position-fixed top-0 left-0 container-fluid p-0 d-flex flex-column justify-content-center align-items-center vh-100">
+    <p class="m-0 text-secondary" style="font-size: 10rem;">{{codigo}}</p>
+    <p class="text-secondary fs-3 m-0"><span class="text-danger">Erro:</span> {{mensagem}}</p>
+</div>
+{% endblock %}

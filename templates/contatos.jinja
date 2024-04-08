@@ -1,0 +1,180 @@
+{% extends "base.jinja" %}
+
+{% macro badge(icone, texto) %}
+    <span class="badge rounded-pill bg-secondary p-2">
+        <i class="bi-{{icone}}"></i> {{texto}}
+    </span>
+{% endmacro %}
+
+{% block title %}Meus Contatos{% endblock %}
+
+{% block main %}
+    <div class="modal fade" id="modal-adicionar" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5">Adicionar Contato</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <form action="{{url_for('salvar_contato')}}" method="post">
+                
+                    <div class="modal-body">
+                        <div class="container-fluid mt-3">
+                            <div class="row">
+                                <div class="col-12 col-lg-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi-person-circle fs-3 pe-3"></i>
+                                        <div class="form-floating flex-grow-1">
+                                            <input type="text" class="form-control" id="nome-contato" placeholder="Nome" name="nome" required>
+                                            <label for="nome-contato">Nome</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi-envelope-at fs-3 pe-3"></i>
+                                        <div class="form-floating flex-grow-1">
+                                            <input type="email" class="form-control" id="email-contato" placeholder="E-mail" name="email" required>
+                                            <label for="email-contato">E-mail</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 col-lg-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi-telephone fs-3 pe-3"></i>
+                                        <div class="form-floating flex-grow-1">
+                                            <input type="tel" class="form-control" id="tel-contato" placeholder="Telefone" name="telefone" required>
+                                            <label for="tel-contato">Telefone</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 col-lg-6 mb-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi-bookmark fs-3 pe-3"></i>
+                                        <div class="form-floating flex-grow-1">
+                                            <select class="form-select" id="tipo-contato" name="tipo" required>
+                                                <option value="" selected>Selecionar</option>
+                                                <option value="Trabalho">Trabalho</option>
+                                                <option value="Família">Família</option>
+                                                <option value="Amigo">Amigo</option>
+                                                <option value="Sem Tipo">Sem Tipo</option>
+                                            </select>
+                                            <label for="tipo-contato">Tipo</label>
+                                        </div>
+                                    </div>     
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-secondary">Limpar</button>
+                        <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Salvar Contato</button>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row mt-4 text-nowrap">
+            <div class="col mb-3 d-flex justify-content-center">
+                <h1 class="fs-3 m-0"><a href="{{url_for('mostrar_contatos', tipo='Todos')}}" class="text-decoration-none text-black">Meus Contatos</a></h1>
+            </div>
+            <div class="col mb-3 d-flex justify-content-center">
+                <button type="button" class="btn btn-primary btn-lg fs-5" data-bs-toggle="modal" data-bs-target="#modal-adicionar"><i class="bi-plus-lg"></i> Adicionar Contato</button>
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="col table-responsive px-3">
+                <form>
+                    <table class="table table-striped text-nowrap fs-5">
+                        <thead>
+                            <tr class="table-danger">
+                                {% for texto in ('nome', 'email', 'telefone', 'tipo')%}
+                                <th>
+                                    <a href="{{url_for('mostrar_contatos')}}" class="text-decoration-none text-black">{{texto.capitalize()}}</a> 
+                                    <a href="{{url_for('mostrar_contatos', ordem=texto, desc='false')}}"><i class="bi bi-caret-up-square text-black"></i></a>
+                                    <a href="{{url_for('mostrar_contatos', ordem=texto, desc='true')}}"><i class="bi bi-caret-down-square text-black"></i></a>
+                                </th>
+                                {% endfor %}
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {% for contato in contatos %}
+
+                                {% if email_editado == contato.email %} 
+
+                                <tr>
+                                    <td><input type="text" class="form-control" id="nome-contato" placeholder="Nome" name="nome" value="{{contato.nome}}" required></td>
+                                    <td><input type="email" class="form-control" id="email-contato" placeholder="E-mail" value="{{contato.email}}" name="email" required></td>
+                                    <td><input type="tel" class="form-control" id="tel-contato" placeholder="Telefone" value="{{contato.telefone}}" name="telefone" required></td>
+                                    <td>
+                                        <select class="form-select" id="tipo-contato" name="tipo" required>
+                                            <option value="">Selecionar</option>
+                                            {% for tipo in ("Trabalho", "Família", "Amigo", "Sem Tipo")%}
+                                                <option value="{{tipo}}" {{"selected" if tipo == contato.tipo else ""}}>{{tipo}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button type="submit" formmethod="post" formaction="{{url_for('salvar_edicao')}}" class="btn btn-success btn-sm fs-6 fw-bold"><i class="bi-check-square"></i> Salvar</button>
+                                        <button type="submit" formmethod="post" formaction="{{url_for('remover_contato', email=contato.email)}}" class="btn btn-danger btn-sm fs-6 fw-bold"><i class="bi-x-lg"></i> Remover</button>
+                                    </td>
+                                </tr>
+
+                                {% else %}
+
+                                <tr>
+                                    <td>{{contato.nome}}</td>
+                                    <!-- Exemplo de filtro -->
+                                    <td>{{contato.email | urlize}}</td>
+                                    <td>{{contato.telefone}}</td>
+                                    <td>
+                                        <a href="{{url_for('mostrar_contatos', tipo=contato.tipo)}}"> 
+                                        {% if contato.tipo == "Sem Tipo" %}
+                                            {{badge("record-circle-fill", "Sem Tipo")}}
+                                        {% elif contato.tipo == "Trabalho" %}
+                                            {{badge("briefcase-fill", "Trabalho")}} 
+                                        {% elif contato.tipo == "Família" %}
+                                            {{badge("house-fill", "Família")}}
+                                        {% elif contato.tipo == "Amigo" %} 
+                                            {{badge("person-raised-hand", "Amigo")}}
+                                        {% else %}
+                                            {{badge("question-circle-fill", contato.tipo)}}
+                                        {% endif %}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <button type="submit" formmethod="post" formaction="{{url_for('editar_contato', email=contato.email)}}" class="btn btn-secondary btn-sm fs-6 fw-bold"><i class="bi-pencil-square"></i> Editar</button>
+                                        <button type="submit" formmethod="post" formaction="{{url_for('remover_contato', email=contato.email)}}" class="btn btn-danger btn-sm fs-6 fw-bold"><i class="bi-x-lg"></i> Remover</button>
+                                    </td>
+                                </tr>
+                                {% endif %}
+
+                            {% else %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="d-flex justify-content-center">
+                                        <p class="m-0 p-2">Nenhum contato encontrado</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock  %}
